@@ -1,0 +1,21 @@
+{
+    "capabilities": [""],
+    "versionCode": 1,
+    "shortName": "GL Shuttle",
+    "uuid": "6153d6c4-cc81-4479-9851-1e63c5a21f51",
+    "companyName": "Alexei Koliada (@alex_koliada)",
+    "resources": {
+        "media": [{
+                "menuIcon": true,
+                "name": "APP_ICON",
+                "type": "png",
+                "file": "images/globallogic.png"
+            }]
+    },
+    "watchapp": {
+        "watchface": false
+    },
+    "versionLabel": "1.0",
+    "longName": "GlobalLogic Shuttle Schedule",
+    "appKeys": {}
+}
