@@ -121,7 +121,7 @@ static void menu_schedule_draw_row_callback(GContext* ctx, const Layer *cell_lay
  * @return 
  */
 int get_time_int(char *time) {
-    char* t;
+    char* t = malloc(sizeof("00:00"));
     int pos, time_int, length = strlen(time);
     strcpy(t, time);
     pos = strcspn(t, ":");
