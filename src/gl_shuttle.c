@@ -115,8 +115,13 @@ static void menu_schedule_draw_row_callback(GContext* ctx, const Layer *cell_lay
     menu_cell_basic_draw(ctx, cell_layer, schedule_array[window_schedule_active_direction].time[cell_index->section][cell_index->row], NULL, NULL);
 }
 
+/**
+ * Cuts ':' from time string and converts to integer
+ * @param time
+ * @return 
+ */
 int get_time_int(char *time) {
-    char* t = malloc(5);
+    char* t;
     int pos, time_int, length = strlen(time);
     strcpy(t, time);
     pos = strcspn(t, ":");
@@ -126,6 +131,9 @@ int get_time_int(char *time) {
     return time_int;
 }
 
+/**
+ * Searches and selects nearest bus based on current time
+ */
 void select_nearest() {
     clock_copy_time_string(time_str, sizeof("00:00"));
     //strcpy(time_str, "20:05");
@@ -256,7 +264,7 @@ static void open_window_about() {
 void menu_main_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
     switch (cell_index->section) {
         case 0:
-            open_window_schedule(cell_index->row);
+            open_window_schedule(cell_index->row); // row index equals WINDOW_SCHEDULE_DIRECTION_FROM_BC and WINDOW_SCHEDULE_DIRECTION_TO_BC
             break;
         case 1:
             switch (cell_index->row) {
@@ -299,10 +307,7 @@ int main(void) {
         .load = window_load,
         .unload = window_unload,
     });
-
     window_stack_push(main_window, true);
-
     app_event_loop();
-
     window_destroy(main_window);
 }
