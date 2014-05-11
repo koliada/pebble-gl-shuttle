@@ -1,7 +1,7 @@
 <p align="center">
 <p>
-    <img src="https://raw.github.com/koliada/pebble-gl-shuttle/master/screenshots/pebble-screenshot_2014-05-12_01-13-32.png">
-    <img src="https://raw.github.com/koliada/pebble-gl-shuttle/master/screenshots/pebble-screenshot_2014-05-12_01-14-30.png">
+    <img src="https://raw.githubusercontent.com/koliada/pebble-gl-shuttle/1ebe5484d9d238a428351f38a5470823ee361524/screenshots/pebble-screenshot_2014-05-12_01-13-32.png">
+    <img src="https://raw.githubusercontent.com/koliada/pebble-gl-shuttle/1ebe5484d9d238a428351f38a5470823ee361524/screenshots/pebble-screenshot_2014-05-12_01-14-30.png">
 </p>
 </p>
 
