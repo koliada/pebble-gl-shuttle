@@ -1,3 +1,10 @@
+<p align="center">
+<p>
+    <img src="https://raw.github.com/koliada/pebble-gl-shuttle/master/screenshots/pebble-screenshot_2014-05-12_01-13-32.png">
+    <img src="https://raw.github.com/koliada/pebble-gl-shuttle/master/screenshots/pebble-screenshot_2014-05-12_01-14-30.png">
+</p>
+</p>
+
 GlobalLogic KBP Shuttle Bus Schedule
 =================
 
@@ -14,3 +21,5 @@ every direction devided onto the two destinations - Subway 'Palats Ukraina' and 
 to search, press central button while watching the schedule
 
 This app could be extended to handle any type of schedules set on the smartphone.
+
+Based on the [simple-menu-layer](https://github.com/pebble/pebble-sdk-examples/tree/master/watchapps/feature_simple_menu_layer) Pebble SDK example.
