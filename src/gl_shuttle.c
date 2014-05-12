@@ -1,70 +1,30 @@
 #include "pebble.h"
-#include "stdio.h"
+#include "gl_shuttle.h"
 
 #define NUM_MENU_MAIN_SECTIONS 2
 #define NUM_MENU_ICONS 3
 #define NUM_FIRST_MENU_ITEMS 2
 #define NUM_MENU_MAIN_SECOND_SECTION_ITEMS 2
 
-char debug_str[10];
-
 static Window *main_window;
-static Window *window_about;
+static Window *window_information;
 static Window *window_schedule;
 
 static MenuLayer *main_menu_layer;
 static MenuLayer *schedule_menu_layer;
-static TextLayer *text_layer_about;
+static TextLayer *text_layer_info;
 
 // Menu items can optionally have an icon drawn with them
 //static GBitmap *menu_icons[NUM_MENU_ICONS];
 
-static char* menu_main_headers[2] = {"Select direction", "Information"};
 
 #define NUM_MENU_SCHEDULE_SECTIONS 2
 #define WINDOW_SCHEDULE_DIRECTION_FROM_BC 0
 #define WINDOW_SCHEDULE_DIRECTION_TO_BC 1
-static int window_schedule_active_direction;
+static int window_schedule_active_direction, window_information_active_index,
+    last_used_direction = 0, last_used_section = 0;
 
-struct {
-    char title[2][30];
-    char subtitle[2][30];
-}direction_menu[2] = {
-    {
-        {"From Office", "To Office"},
-        {"BC Protasov -> Subway", "Subway -> BC Protasov"}
-    },
-    {
-        {"Settings", "About"},
-        {"",""}
-    }
-};
-
-struct {
-    char* header[30];
-    char* time[2][20];
-    int size[2];
-}schedule_array[2] = {
-    {
-        {"To 'Palats Ukraina'", "To 'Druzhby Narodiv'"},
-        {
-            {"11:45", "12:45", "13:45", "14:45", "15:45", "17:05", "17:35", "18:00", "18:10", "18:15", "18:30", "18:40", "19:00", "19:20", "19:40", "20:35", "21:00"},
-            {"18:50", "20:05", "21:30"}
-        },
-        {17, 3}
-    },
-    {
-        {"From 'Palats Ukraina'", "From 'Druzhby Narodiv'"},
-        {
-            {"7:45", "8:20", "8:40", "8:50", "9:00", "9:10", "9:30", "9:40", "9:50", "10:00", "10:10", "10:20", "10:30", "11:00", "11:30", "12:00", "13:00", "14:00", "15:00", "16:00"},
-            {"8:45", "9:35"}
-        },
-        {20, 2}
-    }
-};
-
-char time_str[] = "00:00";
-int last_used_direction = 0, last_used_section = 0;
+char time_str[] = "00:00", debug_str[10];
 
 static uint16_t menu_main_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
     return NUM_MENU_MAIN_SECTIONS;
@@ -117,6 +77,7 @@ static void menu_schedule_draw_row_callback(GContext* ctx, const Layer *cell_lay
 
 /**
  * Cuts ':' from time string and converts to integer
+ * @see http://stackoverflow.com/questions/20342559/how-to-cut-part-of-a-string-in-c
  * @param time
  * @return 
  */
@@ -136,8 +97,8 @@ int get_time_int(char *time) {
  */
 void select_nearest() {
     clock_copy_time_string(time_str, sizeof("00:00"));
-    //strcpy(time_str, "20:05");
-    int time_int, schedule_int, i, row_index = 0, time_prev = 0, size = schedule_array[window_schedule_active_direction].size[last_used_section];
+    //strcpy(time_str, "11:05");
+    int time_int, schedule_int, i, row_index = 0, time_prev = 0, size;
     time_int = get_time_int(time_str);
     /*APP_LOG(APP_LOG_LEVEL_DEBUG, "TIME_STR");
     APP_LOG(APP_LOG_LEVEL_DEBUG, time_str);
@@ -151,6 +112,8 @@ void select_nearest() {
         last_used_direction = window_schedule_active_direction;
         last_used_section = 0;
     }
+    
+    size = schedule_array[window_schedule_active_direction].size[last_used_section];
     
     for (i = 0; i < size; i++) {
         schedule_int = get_time_int(schedule_array[window_schedule_active_direction].time[last_used_section][i]);
@@ -222,7 +185,11 @@ void window_schedule_unload(Window *window) {
     window_destroy(window);
 }
 
-static void open_window_schedule(char window_schedule_direction) {
+/**
+ * Opens schedule window
+ * @param window_schedule_direction Index of the direction
+ */
+static void open_window_schedule(int window_schedule_direction) {
     window_schedule_active_direction = window_schedule_direction;
     window_schedule = window_create();
     window_set_window_handlers(window_schedule, (WindowHandlers) {
@@ -234,30 +201,31 @@ static void open_window_schedule(char window_schedule_direction) {
 
 
 /**
- * About window
+ * Open Usage/About window
  * @param window
  */
-void window_about_load(Window *window) {
-    Layer *window_about_layer = window_get_root_layer(window);
-    GRect bounds = layer_get_frame(window_about_layer);
-    text_layer_about = text_layer_create(bounds);
-    text_layer_set_text(text_layer_about, "2014 Alexei Koliada");
-    text_layer_set_text_alignment(text_layer_about, GTextAlignmentCenter);
-    layer_add_child(window_about_layer, text_layer_get_layer(text_layer_about));
+void window_information_load(Window *window) {
+    Layer *window_information_layer = window_get_root_layer(window);
+    GRect bounds = layer_get_frame(window_information_layer);
+    text_layer_info = text_layer_create(bounds);
+    text_layer_set_text(text_layer_info, information[window_information_active_index].content);
+    text_layer_set_text_alignment(text_layer_info, information[window_information_active_index].text_align);
+    layer_add_child(window_information_layer, text_layer_get_layer(text_layer_info));
 }
 
-void window_about_unload(Window *window) {
-    text_layer_destroy(text_layer_about);
+void window_information_unload(Window *window) {
+    text_layer_destroy(text_layer_info);
     window_destroy(window);
 }
 
-static void open_window_about() {
-    window_about = window_create();
-    window_set_window_handlers(window_about, (WindowHandlers) {
-        .load = window_about_load,
-        .unload = window_about_unload,
+static void open_information_window(int index) {
+    window_information_active_index = index;
+    window_information = window_create();
+    window_set_window_handlers(window_information, (WindowHandlers) {
+        .load = window_information_load,
+        .unload = window_information_unload,
     });
-    window_stack_push(window_about, true);
+    window_stack_push(window_information, true);
 }
 
 
@@ -267,13 +235,8 @@ void menu_main_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, voi
             open_window_schedule(cell_index->row); // row index equals WINDOW_SCHEDULE_DIRECTION_FROM_BC and WINDOW_SCHEDULE_DIRECTION_TO_BC
             break;
         case 1:
-            switch (cell_index->row) {
-                case 0:
-                    break;
-                case 1:
-                    open_window_about();
-                    break;
-            }
+            open_information_window(cell_index->row);
+            break;
     }
 }
 
